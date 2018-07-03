@@ -66,6 +66,7 @@ class UnboundedScrollController extends ScrollController {
     ScrollContext context,
     ScrollPosition oldPosition,
   ) {
+    print("UnboundedScrollPosition: ${context} ${oldPosition}");
     return new UnboundedScrollPosition(
       physics: physics,
       context: context,
@@ -102,7 +103,8 @@ typedef Widget IndexedColorWidgetBuilder(
 class WrappingListViewState extends State<WrappingListView>
     with AfterLayoutMixin<WrappingListView> {
   UnboundedScrollController _controller = new UnboundedScrollController();
-  UnboundedScrollController _negativeController  = new UnboundedScrollController();
+  UnboundedScrollController _negativeController =
+      new UnboundedScrollController();
 
   @override
   void initState() {
@@ -201,28 +203,50 @@ class DividedListViewState extends State<DividedListView>
 
   @override
   void initState() {
+    print("initState");
     super.initState();
-    _controller = new UnboundedScrollController(
-        initialScrollOffset: 0.0, keepScrollOffset: false);
-    _negativeController =
-        new UnboundedScrollController(keepScrollOffset: false);
+    _controller?.dispose();
+    _negativeController?.dispose();
+    _controller = new UnboundedScrollController(keepScrollOffset: false);
+    _negativeController = new UnboundedScrollController();
 
-    _controller.addListener(jumpNegativeController);
+    //_controller.addListener(jumpNegativeController);
+
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      print("addPersistentFrameCallback");
+      jumpNegativeController();
+    });
   }
 
   void jumpNegativeController() {
-    _negativeController.jumpTo(-_negativeController.position.extentInside -
-        _controller.position.pixels);
+    var extentInside = -560.0; //-_negativeController.position.extentInside;
+    print(
+        "negC jump to ${extentInside} - ${_controller.position.pixels} = ${-_negativeController.position.extentInside -
+        _controller.position.pixels}");
+    _negativeController.jumpTo(extentInside - _controller.position.pixels);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(jumpNegativeController);
+    print("dispose");
+    // _controller.removeListener(jumpNegativeController);
     super.dispose();
   }
 
   @override
+  void didUpdateWidget(DividedListView oldWidget) {
+    print("didUpdateWidget ${oldWidget}");
+    _controller?.dispose();
+    _negativeController?.dispose();
+    _controller = new UnboundedScrollController(keepScrollOffset: false);
+    _negativeController = new UnboundedScrollController();
+
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   void afterFirstLayout(BuildContext context) {
+    print("afterFirstLayout");
     _negativeController.jumpTo(-_negativeController.position.extentInside -
         _controller.position.pixels);
   }
@@ -233,6 +257,7 @@ class DividedListViewState extends State<DividedListView>
     return new Stack(
       children: <Widget>[
         new CustomScrollView(
+          key: new GlobalObjectKey("neg${widget.startIndex}"),
           physics: new AlwaysScrollableScrollPhysics(),
           controller: _negativeController,
           reverse: true,
@@ -240,21 +265,31 @@ class DividedListViewState extends State<DividedListView>
             new SliverList(
               delegate: new SliverChildBuilderDelegate(
                   (BuildContext context, int index) {
+                var item = new Container(
+                    key: new GlobalObjectKey(widget.startIndex - index - 1),
+                    decoration:
+                        BoxDecoration(border: Border.all(color: Colors.black)),
+                    child: widget.itemBuilder(
+                      context,
+                      widget.startIndex - index - 1,
+                    ));
                 print(
-                    "CustomScrollView $index ${_negativeController.position.pixels}");
-                return widget.itemBuilder(
-                  context,
-                  widget.startIndex - index - 1,
-                );
+                    "CustomScrollView $index neg.offset=${_negativeController.position.pixels} widget.key=${item.key}");
+                return item;
               }),
             ),
           ],
         ),
         new ListView.builder(
+          key: new GlobalObjectKey("pos${widget.startIndex}"),
           controller: _controller,
           itemBuilder: (BuildContext context, int index) {
-            print("ListView.builder $index ${_controller.position.pixels}");
-            return widget.itemBuilder(context, widget.startIndex + index);
+            var item = new Container(
+                key: new GlobalObjectKey(widget.startIndex + index),
+                child: widget.itemBuilder(context, widget.startIndex + index));
+            print(
+                "ListView.builder $index pos.offset=${_controller.position.pixels} widget.key=${item.key}");
+            return item;
           },
         ),
       ],
