@@ -73,6 +73,8 @@ class UnboundedScrollController extends ScrollController {
   }
 }
 
+//this Wrapping ListView is from original example
+//https://stackoverflow.com/questions/44468337/how-can-i-make-a-scrollable-wrapping-view-with-flutter
 class WrappingListView extends StatefulWidget {
   factory WrappingListView({Key key, List<Widget> children}) {
     return new WrappingListView.builder(
@@ -150,7 +152,11 @@ class WrappingListViewState extends State<WrappingListView> {
 }
 
 class DividedListView extends StatefulWidget {
-  factory DividedListView({Key key, List<Widget> children, int startIndex,}) {
+  factory DividedListView({
+    Key key,
+    List<Widget> children,
+    int startIndex,
+  }) {
     return new DividedListView.builder(
       startIndex: startIndex,
       itemCount: children.length,
@@ -173,10 +179,9 @@ class DividedListView extends StatefulWidget {
 }
 
 class DividedListViewState extends State<DividedListView> {
-  UnboundedScrollController _controller =
-  new UnboundedScrollController();
+  UnboundedScrollController _controller = new UnboundedScrollController();
   UnboundedScrollController _negativeController =
-  new UnboundedScrollController();
+      new UnboundedScrollController();
 
   @override
   void initState() {
@@ -202,7 +207,8 @@ class DividedListViewState extends State<DividedListView> {
                 print(
                     "CustomScrollView $index ${_negativeController.position.pixels}");
                 return widget.itemBuilder(
-                  context, widget.startIndex - index - 1,
+                  context,
+                  widget.startIndex - index - 1,
                 );
               }),
             ),
@@ -212,8 +218,7 @@ class DividedListViewState extends State<DividedListView> {
           controller: _controller,
           itemBuilder: (BuildContext context, int index) {
             print("ListView.builder $index ${_controller.position.pixels}");
-            return widget.itemBuilder(
-                context, widget.startIndex + index);
+            return widget.itemBuilder(context, widget.startIndex + index);
           },
         ),
       ],

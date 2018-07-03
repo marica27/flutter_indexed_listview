@@ -3,13 +3,20 @@ import 'indexed.listview.dart';
 import 'dart:math';
 import 'dart:async';
 
+import 'dividedlistview.dart';
+
 void main() => runApp(new MyApp());
 
-  List<double> _kHeights = new List<double>.generate(100, (int index){
-    var random = new Random();
-    return random.nextInt(10) * 10.0 + 20.0;
-  });
+void main1() {
+  runApp(new MaterialApp(
+    home: new HomePage(),
+  ));
+}
 
+List<double> _kHeights = new List<double>.generate(100, (int index) {
+  var random = new Random();
+  return random.nextInt(10) * 10.0 + 20.0;
+});
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -37,11 +44,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex;
- ScrollController controller;
+  ScrollController controller;
 
   @override
   void initState() {
-    _selectedIndex = null;
+    _selectedIndex = 0;
     controller = new ScrollController();
   }
 
@@ -58,16 +65,15 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: new IndexedListView(
-        initalIndex: _selectedIndex,
-        controller: controller,
+      body: new DividedListView.builder(
+        startIndex: _selectedIndex,
         itemBuilder: _itemBuilder,
       ),
     );
   }
 
   _showDialog(BuildContext context) {
-    final controller = TextEditingController();
+    final textController = TextEditingController();
     FocusNode focusNode = new FocusNode();
 
     showDialog<int>(
@@ -75,13 +81,13 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context) {
           new Future.delayed(new Duration(milliseconds: 300), () {
             FocusScope.of(context).requestFocus(focusNode);
-          } );
+          });
 
           return new AlertDialog(
             title: new Text("Jump to index"),
             content: new TextField(
               focusNode: focusNode,
-              controller: controller,
+              controller: textController,
               keyboardType: TextInputType.numberWithOptions(),
             ),
             actions: <Widget>[
@@ -93,19 +99,22 @@ class _MyHomePageState extends State<MyHomePage> {
               new FlatButton(
                   child: const Text('ok'),
                   onPressed: () {
-                    Navigator.pop(context, int.parse(controller.text));
+                    Navigator.pop(context, int.parse(textController.text));
                   })
             ],
           );
         }).then((int index) {
-      setState(() {
-        _selectedIndex = index;
-      });
+      if (index != null) {
+        setState(() {
+          _selectedIndex = index;
+          //controller.jumpTo(index * 10.0);
+        });
+      }
     });
   }
 
   Widget _itemBuilder(BuildContext context, int index) {
-    print("_itemBuilder index=$index offset=${controller.position.pixels}" );
+    print("_itemBuilder index=$index ");
     double height = _kHeights[index % _kHeights.length];
     return new Padding(
         padding: EdgeInsets.all(4.0),
@@ -115,8 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new Container(
                 //margin: EdgeInsets.all(14.0),
                 height: height,
-                child: new Align(
-                    alignment: Alignment.centerLeft,
-                    child: new Text("$index: ${height.floor()}")))));
+                child: new Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: new Align(
+                        alignment: Alignment.centerLeft,
+                        child: new Text("$index: h${height.floor()}.0"))))));
   }
 }
