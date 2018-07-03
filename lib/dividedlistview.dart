@@ -196,8 +196,8 @@ class DividedListView extends StatefulWidget {
   DividedListViewState createState() => new DividedListViewState();
 }
 
-class DividedListViewState extends State<DividedListView>
-    with AfterLayoutMixin<DividedListView> {
+class DividedListViewState extends State<DividedListView> {
+    //with AfterLayoutMixin<DividedListView> {
   UnboundedScrollController _controller;
   UnboundedScrollController _negativeController;
 
