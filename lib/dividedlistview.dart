@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+import 'package:after_layout/after_layout.dart';
+
 void main() {
   runApp(new MaterialApp(
     home: new HomePage(),
@@ -97,21 +99,35 @@ class WrappingListView extends StatefulWidget {
 typedef Widget IndexedColorWidgetBuilder(
     BuildContext context, Color color, int index);
 
-class WrappingListViewState extends State<WrappingListView> {
-  UnboundedScrollController _controller =
-      new UnboundedScrollController(initialScrollOffset: -100.0);
-  UnboundedScrollController _negativeController =
-      new UnboundedScrollController(initialScrollOffset: -460.0);
+class WrappingListViewState extends State<WrappingListView>
+    with AfterLayoutMixin<WrappingListView> {
+  UnboundedScrollController _controller = new UnboundedScrollController();
+  UnboundedScrollController _negativeController  = new UnboundedScrollController();
 
   @override
   void initState() {
-    _controller.addListener(() {
-      print(
-          "listener: ${-_negativeController.position.extentInside} - ${_controller.position.pixels} = ${
-          -_negativeController.position.extentInside - _controller.position.pixels}");
-      _negativeController.jumpTo(-_negativeController.position.extentInside -
-          _controller.position.pixels);
-    });
+    super.initState();
+//    _controller = new UnboundedScrollController();
+//    _negativeController = new UnboundedScrollController();
+
+    _controller.addListener(jumpNegativeController);
+  }
+
+  void jumpNegativeController() {
+    _negativeController.jumpTo(-_negativeController.position.extentInside -
+        _controller.position.pixels);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(jumpNegativeController);
+    super.dispose();
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    _negativeController.jumpTo(-_negativeController.position.extentInside -
+        _controller.position.pixels);
   }
 
   @override
@@ -178,17 +194,37 @@ class DividedListView extends StatefulWidget {
   DividedListViewState createState() => new DividedListViewState();
 }
 
-class DividedListViewState extends State<DividedListView> {
-  UnboundedScrollController _controller = new UnboundedScrollController();
-  UnboundedScrollController _negativeController =
-      new UnboundedScrollController();
+class DividedListViewState extends State<DividedListView>
+    with AfterLayoutMixin<DividedListView> {
+  UnboundedScrollController _controller;
+  UnboundedScrollController _negativeController;
 
   @override
   void initState() {
-    _controller.addListener(() {
-      _negativeController.jumpTo(-_negativeController.position.extentInside -
-          _controller.position.pixels);
-    });
+    super.initState();
+    _controller = new UnboundedScrollController(
+        initialScrollOffset: 0.0, keepScrollOffset: false);
+    _negativeController =
+        new UnboundedScrollController(keepScrollOffset: false);
+
+    _controller.addListener(jumpNegativeController);
+  }
+
+  void jumpNegativeController() {
+    _negativeController.jumpTo(-_negativeController.position.extentInside -
+        _controller.position.pixels);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(jumpNegativeController);
+    super.dispose();
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) {
+    _negativeController.jumpTo(-_negativeController.position.extentInside -
+        _controller.position.pixels);
   }
 
   @override
