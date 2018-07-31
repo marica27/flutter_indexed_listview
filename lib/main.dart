@@ -138,6 +138,7 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   String title;
 
+
   MyHomePage({this.title});
 
   @override
@@ -168,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       body: new DividedListView.builder(
+        key: new GlobalObjectKey("DividedListView${_selectedIndex}"),
         startIndex: _selectedIndex,
         itemBuilder: _itemBuilder,
       ),

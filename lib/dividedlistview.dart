@@ -219,7 +219,7 @@ class DividedListViewState extends State<DividedListView> {
   }
 
   void jumpNegativeController() {
-    var extentInside = -560.0; //-_negativeController.position.extentInside;
+    var extentInside = -_negativeController.position.extentInside;
     print(
         "negC jump to ${extentInside} - ${_controller.position.pixels} = ${-_negativeController.position.extentInside -
         _controller.position.pixels}");
